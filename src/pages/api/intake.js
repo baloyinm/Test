@@ -25,9 +25,17 @@ export const POST = async ({ request }) => {
     if (budget) fields["Budget Range"] = budget;
     if (message) fields.Message = message;
 
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    const tableName = process.env.AIRTABLE_TABLE_NAME || 'Intake';
+    const apiKey = import.meta.env.AIRTABLE_API_KEY || process.env.AIRTABLE_API_KEY;
+    const baseId = import.meta.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_BASE_ID;
+    const tableName = import.meta.env.AIRTABLE_TABLE_NAME || process.env.AIRTABLE_TABLE_NAME || 'Intake';
+
+    if (!apiKey || !baseId) {
+      console.error('Missing Airtable configuration (AIRTABLE_API_KEY or AIRTABLE_BASE_ID).');
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     const airtableResponse = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`, {
       method: 'POST',
