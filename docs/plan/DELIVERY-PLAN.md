@@ -12,7 +12,7 @@ An Astro 7 site (Vercel, server output) for "Infinae": luxury advisory pages (ad
 | Server-side validation of the intake form (`src/lib/intake-validate.js`) | `npm test`: 7 pass, including the live field names | Verified |
 | Fix intake consent bug: form sends consent=yes, handler only accepted "on", so consent was always saved as false | test "accepts the live contact form field names" | Verified |
 | Honeypot `company_website` is now honoured | test "flags the live honeypot field" | Verified |
-| CI: install, test, build, audit, gitleaks | workflow file present; first run not yet read | NOT VERIFIED (read the Actions result) |
+| CI: install, test, build, audit, gitleaks | Actions run on b9b2ddc: success | Verified |
 | Stop tracking .DS_Store files | `git ls-files | grep DS_Store` is empty | Verified |
 
 ## Unfinished
