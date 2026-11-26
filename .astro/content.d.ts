@@ -85,6 +85,10 @@ declare module 'astro:content' {
 		entry: DataEntryMap[C][string],
 	): Promise<RenderResult>;
 
+	export function render<C extends keyof LiveContentConfig['collections']>(
+		entry: import('astro').LiveDataEntry<LiveLoaderDataType<C>>,
+	): Promise<RenderResult>;
+
 	export function reference<
 		C extends
 			| keyof DataEntryMap
@@ -127,6 +131,7 @@ declare module 'astro:content' {
   data: InferEntrySchema<"about">;
   rendered?: RenderedContent;
   filePath?: string;
+  digest?: string | number;
 }>;
 "authors": Record<string, {
   id: string;
@@ -135,6 +140,7 @@ declare module 'astro:content' {
   data: InferEntrySchema<"authors">;
   rendered?: RenderedContent;
   filePath?: string;
+  digest?: string | number;
 }>;
 "blog": Record<string, {
   id: string;
@@ -143,6 +149,7 @@ declare module 'astro:content' {
   data: InferEntrySchema<"blog">;
   rendered?: RenderedContent;
   filePath?: string;
+  digest?: string | number;
 }>;
 "contact": Record<string, {
   id: string;
@@ -151,6 +158,7 @@ declare module 'astro:content' {
   data: InferEntrySchema<"contact">;
   rendered?: RenderedContent;
   filePath?: string;
+  digest?: string | number;
 }>;
 "ctaSection": Record<string, {
   id: string;
@@ -159,6 +167,7 @@ declare module 'astro:content' {
   data: InferEntrySchema<"ctaSection">;
   rendered?: RenderedContent;
   filePath?: string;
+  digest?: string | number;
 }>;
 "homepage": Record<string, {
   id: string;
@@ -167,6 +176,7 @@ declare module 'astro:content' {
   data: InferEntrySchema<"homepage">;
   rendered?: RenderedContent;
   filePath?: string;
+  digest?: string | number;
 }>;
 "pages": Record<string, {
   id: string;
@@ -175,6 +185,7 @@ declare module 'astro:content' {
   data: InferEntrySchema<"pages">;
   rendered?: RenderedContent;
   filePath?: string;
+  digest?: string | number;
 }>;
 "testimonialSection": Record<string, {
   id: string;
@@ -183,6 +194,7 @@ declare module 'astro:content' {
   data: InferEntrySchema<"testimonialSection">;
   rendered?: RenderedContent;
   filePath?: string;
+  digest?: string | number;
 }>;
 
 	};

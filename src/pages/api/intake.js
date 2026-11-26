@@ -1,16 +1,22 @@
 
+import { validateIntake } from '../../lib/intake-validate.js';
+
 export const POST = async ({ request }) => {
   try {
     const formData = await request.formData();
     
-    const name = formData.get('name')?.toString().trim() || '';
-    const email = formData.get('email')?.toString().trim() || '';
-    const phone = formData.get('phone')?.toString().trim() || '';
-    const city = formData.get('city')?.toString().trim() || '';
-    const stage = formData.get('stage')?.toString().trim() || '';
-    const budget = formData.get('budget')?.toString().trim() || '';
-    const message = formData.get('message')?.toString().trim() || '';
-    const consent = formData.get('consent') === 'on';
+    const { ok, errors, data } = validateIntake((k) => formData.get(k));
+    if (data.honeypot) {
+      // Bots fill the hidden field: pretend success, save nothing.
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (!ok) {
+      return new Response(JSON.stringify({ error: 'Please check the form', errors }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    const { name, email, phone, city, stage, budget, message, consent } = data;
 
     const fields = {
       Name: name,
