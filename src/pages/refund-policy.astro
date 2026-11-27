@@ -1,8 +1,10 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
 import PrimaryNav from "../components/PrimaryNav.astro";
 import Footer from "../components/Footer.astro";
 ---
 
+<BaseLayout title="Refund Policy" description="Infinae refund policy.">
 <PrimaryNav />
 
 <main class="page">
@@ -45,6 +47,7 @@ import Footer from "../components/Footer.astro";
 </main>
 
 <Footer />
+</BaseLayout>
 
 <style>
   .page {
