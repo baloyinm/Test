@@ -1,7 +1,7 @@
 // Pure validation for the advisory intake form. No network, no secrets.
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE = /^[+()\d\s\-.]{7,20}$/;
-export const LIMITS = { name: 100, email: 254, phone: 20, city: 100, stage: 100, budget: 100, message: 2000 };
+export const LIMITS = { name: 100, email: 254, phone: 20, city: 100, stage: 100, budget: 100, source: 100, group: 100, interest: 100, message: 2000 };
 
 export function validateIntake(get) {
   const val = (k) => (get(k)?.toString().trim() || '');
@@ -9,6 +9,7 @@ export function validateIntake(get) {
     name: val('name'), email: val('email'), phone: val('phone'), city: val('city'),
     stage: val('stage') || val('interest'), budget: val('budget') || val('budget_range'), message: val('message'),
     consent: ['on', 'yes', 'true'].includes(get('consent')?.toString()),
+    source: val('source'), group: val('ml_group'), interest: val('interest'),
     honeypot: val('company_website') || val('website'),
   };
   const errors = {};

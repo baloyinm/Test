@@ -1,8 +1,20 @@
 
 import { validateIntake } from '../../lib/intake-validate.js';
+import { createLimiter, clientKey } from '../../lib/rate-limit.js';
+import { buildFields } from '../../lib/airtable-fields.js';
+
+const cfg = (k) => import.meta.env[k] || process.env[k];
+const limiter = createLimiter({
+  max: Number(cfg('INTAKE_RATE_MAX')) || 5,
+  windowMs: (Number(cfg('INTAKE_RATE_WINDOW_SECONDS')) || 60) * 1000,
+});
+const json = (body, status = 200, headers = {}) =>
+  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...headers } });
 
 export const POST = async ({ request }) => {
   try {
+    const rl = limiter.check(clientKey(request.headers));
+    if (!rl.allowed) return json({ error: 'Too many requests. Please try again shortly.' }, 429, { 'Retry-After': String(rl.retryAfter) });
     const formData = await request.formData();
     
     const { ok, errors, data } = validateIntake((k) => formData.get(k));
@@ -16,20 +28,14 @@ export const POST = async ({ request }) => {
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    const { name, email, phone, city, stage, budget, message, consent } = data;
+    // Setting: INTAKE_DRY_RUN=1 validates and answers success without saving anything.
+    if (cfg('INTAKE_DRY_RUN') === '1') return json({ success: true, message: 'Thank you. We will be in touch soon.', dryRun: true });
 
-    const fields = {
-      Name: name,
-      Email: email,
-      "Phone Number": phone,
-      City: city,
-      "Business Stage": stage,
-      Consent: consent,
-      Status: "New"
-    };
-
-    if (budget) fields["Budget Range"] = budget;
-    if (message) fields.Message = message;
+    const fields = buildFields(data, {
+      AIRTABLE_INTEREST_FIELD: cfg('AIRTABLE_INTEREST_FIELD'),
+      AIRTABLE_SOURCE_FIELD: cfg('AIRTABLE_SOURCE_FIELD'),
+      AIRTABLE_GROUP_FIELD: cfg('AIRTABLE_GROUP_FIELD'),
+    });
 
     const apiKey = import.meta.env.AIRTABLE_API_KEY || process.env.AIRTABLE_API_KEY;
     const baseId = import.meta.env.AIRTABLE_BASE_ID || process.env.AIRTABLE_BASE_ID;

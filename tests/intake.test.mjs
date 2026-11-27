@@ -34,3 +34,31 @@ test('accepts the live contact form field names (consent=yes, budget_range, inte
 test('flags the live honeypot field company_website', () => {
   assert.ok(validateIntake(form({ ...good, company_website: 'x' })).data.honeypot);
 });
+
+import { createLimiter, clientKey } from '../src/lib/rate-limit.js';
+import { buildFields } from '../src/lib/airtable-fields.js';
+
+test('rate limiter: 6th post in a window is refused, window then resets', () => {
+  let t = 0;
+  const l = createLimiter({ max: 5, windowMs: 60000, now: () => t });
+  for (let i = 0; i < 5; i++) assert.equal(l.check('1.1.1.1').allowed, true);
+  const r = l.check('1.1.1.1');
+  assert.equal(r.allowed, false);
+  assert.ok(r.retryAfter > 0);
+  assert.equal(l.check('2.2.2.2').allowed, true);
+  t = 61000;
+  assert.equal(l.check('1.1.1.1').allowed, true);
+});
+test('clientKey takes the first forwarded address', () => {
+  assert.equal(clientKey(new Headers({ 'x-forwarded-for': '9.9.9.9, 8.8.8.8' })), '9.9.9.9');
+  assert.equal(clientKey(new Headers()), 'unknown');
+});
+test('extra Airtable columns are only sent when configured', () => {
+  const d = validateIntake(form({ ...good, interest: 'Advisory', source: 'contact_page', ml_group: 'General Enquiries' })).data;
+  const plain = buildFields(d, {});
+  assert.equal(plain.Name, 'Test Person');
+  assert.equal(Object.keys(plain).includes('Area of interest'), false);
+  const withCols = buildFields(d, { AIRTABLE_INTEREST_FIELD: 'Area of interest', AIRTABLE_SOURCE_FIELD: 'Source' });
+  assert.equal(withCols['Area of interest'], 'Advisory');
+  assert.equal(withCols.Source, 'contact_page');
+});
